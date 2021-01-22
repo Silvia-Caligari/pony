@@ -26,6 +26,20 @@ diffusion2 = 10.0
 []
 
 [BCs]
+  [./bottom]
+    type = DirichletBC
+   # preset = false
+    variable = u
+    boundary = bottom
+    value = 0
+    [../]
+  [./top]
+    type = DirichletBC
+   # preset = false
+    variable = u
+    boundary = top
+    value = 0
+    [../]
   [./left]
     type = DirichletBC
    # preset = false
@@ -38,7 +52,7 @@ diffusion2 = 10.0
    # preset = false
     variable = u
     boundary = right
-    value = 1
+    value = 0
   [../]
 []
 
