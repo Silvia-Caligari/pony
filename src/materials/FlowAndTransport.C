@@ -34,7 +34,7 @@ FlowAndTransport::computeQpProperties()
 
     Real y_point = _q_point[_qp](1);
 
-    if (x_point < 0.5 && y_point < 0.5)
+    if (x_point < 0.0 && y_point < 0.0)
 
             _diffusion[_qp] = _diffusion_2;
 
