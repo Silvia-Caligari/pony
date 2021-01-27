@@ -10,11 +10,26 @@
   [../]
 []
 
+[Functions]
+  [./parsed_function]
+    type = ParsedFunction
+    value = 'sin(x)-cos(y/2)'
+  [../]
+[]
+
+[ICs]
+  [./u_ic]
+    type = FunctionIC
+    variable = 'u'
+    function = parsed_function
+  [../]
+[]
+
 [Materials]
 [./diffusion] 
 type = FlowAndTransport 
 diffusion1 = 1.0 
-diffusion2 = 10.0 
+diffusion2 = 100.0 
 [../]
 []
 
@@ -22,39 +37,16 @@ diffusion2 = 10.0
   [./diff]
     type = MyDiffusion
     variable = u
+    [../]
+[./timederivative]
+    type = Mytimederivative
+    variable = u
+    first_coefficient = 1
+    second_coefficient = 1
   [../]
 []
 
-[BCs]
-  [./bottom]
-    type = DirichletBC
-   # preset = false
-    variable = u
-    boundary = bottom
-    value = 0
-    [../]
-  [./top]
-    type = DirichletBC
-   # preset = false
-    variable = u
-    boundary = top
-    value = 0
-    [../]
-  [./left]
-    type = DirichletBC
-   # preset = false
-    variable = u
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-   # preset = false
-    variable = u
-    boundary = right
-    value = 0
-  [../]
-[]
+
 
 [Preconditioning]
   [./pre]
@@ -64,8 +56,11 @@ diffusion2 = 10.0
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'LINEAR'
+  start_time = 0.0
+  end_time = 1.0
+  dt = 0.05
 #  petsc_options = '-pc_svd_monitor -ksp_view_pmat'
 #  petsc_options_iname = '-pc_type'
 #  petsc_options_value = 'svd'
