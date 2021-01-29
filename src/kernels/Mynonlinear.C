@@ -19,6 +19,8 @@ Mynonlinear::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription("The nonlinear term f(u) = alpha*u*(u-beta)(gamma-u), with the weak "
                              "form of $(\\phi_i, f(u))$.");
+  params.addParam<Real>("beta", 1.0, "uthresh");
+  params.addParam<Real>("delta", 1.0, "udepol");
   return params;
 }
 

@@ -27,12 +27,12 @@
 
 [Materials]
 [./Myproblem] 
-type = FlowAndTransport 
+type = CardiacProblem 
 diffusion1 = 0.001 
 diffusion2 = 0.001
 C_m = 1 
 surf_per_volume = 1
-_alpha = 18.5150
+alpha = 18.5150
 [../]
 #[./timederivative]
 #type = FlowAndTransport
@@ -76,7 +76,7 @@ delta = 1
   type = Transient
   solve_type = 'LINEAR'
   start_time = 0.0
-  end_time = 1.0
+  end_time = 5.0
   dt = 0.05
 #  petsc_options = '-pc_svd_monitor -ksp_view_pmat'
 #  petsc_options_iname = '-pc_type'
