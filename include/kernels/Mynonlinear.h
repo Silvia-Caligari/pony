@@ -10,32 +10,35 @@
 #pragma once
 
 #include "Kernel.h"
-#include "MooseVariableScalar.h"
 
-class Mytimederivative;
+class Mynonlinear;
 
 template <>
-InputParameters validParams<Mytimederivative>();
+InputParameters validParams<Mynonlinear>();
 
 
 /**
- * This kernel implements the weak form of time derivative:
- * $\partial u \cdot  \phi_i$
+ * This kernel implements the non linear term alpha*u*(u-\beta)(\delta-u)
  */
-class Mytimederivative : public Kernel
+class Mynonlinear : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  Mytimederivative(const InputParameters & parameters);
+  Mynonlinear(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian() override;
+  //virtual Real computeQpJacobian() override;
     
-  MaterialProperty<Real> const & _time_coefficient;
+  MaterialProperty<Real> const & _nonlinear_coefficient;
     
-  const VariableValue & _u_old; 
+  const VariableValue & _u_old;
+    
+  const Real & _beta;
+    
+  const Real & _delta;
     
 };
+

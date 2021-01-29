@@ -25,6 +25,9 @@ protected:
 
     Real const _diffusion_1;
     Real const _diffusion_2;
+    Real const _C_m;
+    Real const _Chi;
+    Real const _alpha;
 
     //Real const _poroInput;
     //Real _condFracture;
@@ -41,6 +44,8 @@ protected:
     //MaterialProperty<Real> &_poro;
     //MaterialProperty<RealTensorValue> &_K;
     MaterialProperty<Real> &_diffusion;
+    MaterialProperty<Real> &_time_coefficient;
+    MaterialProperty<Real> &_nonlinear_coefficient;
     //MaterialProperty<RealVectorValue> &_U;
 
 };
