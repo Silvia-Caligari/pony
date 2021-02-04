@@ -26,57 +26,48 @@
 []
 
 [Materials]
-[./Myproblem] 
-type = CardiacProblem 
-diffusion1 = 0.001 
-diffusion2 = 0.001
-C_m = 1 
-surf_per_volume = 1
-alpha = 18.5150
-[../]
-#[./timederivative]
-#type = FlowAndTransport
-#C_m = 1
-surf_per_volume = 1
-#[../]
-#[./nonlinear]
-#type = FlowAndTransport
-#_alpha = 18.5150
-#[../]
+  [./FHN_EP] 
+     type =  EPmaterials
+     diffusion_i = 0.001 
+     diffusion_e = 0.001
+     C_m = 1 #membrane conductance
+     Chi = 1 #surface per volume
+  [../]
 []
 
 [Kernels]
   [./diff]
-    type = MyDiffusion
-    variable = u
-    [../]
-[./timederivative]
-    type = Mytimederivative
-    variable = u
-
+     type = EPdiffusion
+     variable = u
   [../]
-[./Nonlinear]
- type = Mynonlinear
-variable = u
-beta = 0.2383
-delta = 1
-[../]
+  [./timederivative]
+     type = EPtimederivative
+     variable = u
+     order = 2 #order of time discretization (=1 or =2)
+  [../]
+  [./Nonlinear]
+     type = FHNionicfunction
+     variable = u
+     uthresh = 0.2383
+     udepol = 1
+     urest = 0
+     alpha = 18.32 #ionic function coefficient f(u)=alpha*(u-u_rest)(u-u_thresh)(u-u_depol)
+     explicit = true # =true if explicit or =false if implicit
+  [../]
 []
-
-
 
 [Preconditioning]
   [./pre]
-    type = SMP 
-    full = true
+     type = SMP 
+     full = true
   [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'LINEAR'
+  solve_type = 'NEWTON'
   start_time = 0.0
-  end_time = 5.0
+  end_time = 0.05
   dt = 0.05
 #  petsc_options = '-pc_svd_monitor -ksp_view_pmat'
 #  petsc_options_iname = '-pc_type'
