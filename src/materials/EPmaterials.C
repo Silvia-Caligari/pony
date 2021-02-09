@@ -35,6 +35,8 @@ EPmaterials::computeQpProperties()
 	
     time_coefficient[_qp] = C_m * Chi;
     
+    //diffusion[_qp] = diffusion_i;
+    
     diffusion[_qp]= (diffusion_i + diffusion_e)/(diffusion_i * diffusion_e);
     
     /*Real x_point = _q_point[_qp](0);
