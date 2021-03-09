@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 1000
-  ny = 1000
+  nx = 100
+  ny = 100
 []
 
 [Variables]
@@ -10,10 +10,15 @@
   [../]
 []
 
+#[AuxVariables]
+#[./activation_time]
+#[../]
+#[]
+
 [Functions]
   [./parsed_function]
     type = ParsedFunction
-    value = '-85.0 + 95.0*(x<0.05)*(y<0.05)'
+    value = '(x<0.05)*(y<0.05)'
   [../]
 []
 
@@ -26,12 +31,16 @@
 []
 
 [Materials]
-  [./FHN_EP] 
+  [./fibers_base]
+     type = EPfibersdirections
+     a_l = '1 0 0'
+     a_t = '0 1 0'
+  [../] 
+  [./materials_electrophysiology] 
      type =  EPmaterials
-     diffusion_i = 0.17 
-     diffusion_e = 0.62
-     C_m = 0.01 #membrane conductance
-     Chi = 140.0 #surface per volume
+     sigma_i = '0.001 0.001 0'
+     C_m = 1.0 #membrane conductance
+     Chi = 1.0 #surface per volume
   [../]
 []
 
@@ -48,13 +57,22 @@
   [./Nonlinear]
      type = FHNionicfunction
      variable = u
-     uthresh = -57.6
-     udepol = 30.0
-     urest = -85.0
-     alpha =  0.000014 #ionic function coefficient f(u)=alpha*(u-u_rest)(u-u_thresh)(u-u_depol)
+     uthresh = 0.25
+     udepol = 1.0
+     urest = 0.0
+     alpha =  5.0 #ionic function coefficient f(u)=alpha*(u-u_rest)(u-u_thresh)(u-u_depol)
      explicit = true # =true if explicit or =false if implicit
   [../]
 []
+
+#[AuxKernels]
+#[./activation]
+#type = TimeActivation
+#variable = activation_time
+#coupled_variable = u
+#uthresh = 0.25
+#[../]     
+#[]
 
 [Preconditioning]
   [./pre]
@@ -67,8 +85,8 @@
   type = Transient
   solve_type = 'NEWTON'
   start_time = 0.0
-  end_time = 1.0
-  dt = 0.000125
+  end_time = 100.0
+  dt = 0.002
 #  petsc_options = '-pc_svd_monitor -ksp_view_pmat'
 #  petsc_options_iname = '-pc_type'
 #  petsc_options_value = 'svd'

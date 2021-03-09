@@ -24,7 +24,7 @@ EPdiffusion::validParams()
 
 EPdiffusion::EPdiffusion(const InputParameters & parameters) :
 Kernel(parameters),
-diffusion(getMaterialProperty<Real>("diffusionProperty"))
+_K(getMaterialProperty<RealTensorValue>("_K"))
 {}
 
 
@@ -32,11 +32,12 @@ diffusion(getMaterialProperty<Real>("diffusionProperty"))
 Real
 EPdiffusion::computeQpResidual()
 {
-  return diffusion[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
+
+  return   _grad_u[_qp] * _K[_qp] * _grad_test[_i][_qp];
 }
 
 Real
 EPdiffusion::computeQpJacobian()
 {
-  return diffusion[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return  _grad_phi[_j][_qp] * _K[_qp] * _grad_test[_i][_qp];
 }

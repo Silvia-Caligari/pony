@@ -19,30 +19,26 @@ protected:
    // MeshGeneratorName       _meshGeneratorName;
    // bool              const _hasMeshGenerator;
 
-    Real const diffusion_i;
-    Real const diffusion_e;
+    RealVectorValue const sigma_i;
+    //RealVectorValue const sigma_e;
+    
     Real const C_m;
     Real const Chi;
     
-
-    //Real const _poroInput;
-    //Real _condFracture;
+    MaterialProperty<Real> &sigma_l;
+    MaterialProperty<Real> &sigma_t;
+    MaterialProperty<Real> &sigma_n;
     
-    //Real _dim;
-    //RealTensorValue _id;
-    //RealVectorValue _u_elem;
-
-    //bool const _isPressureValid;
-    //bool const _conservativeScheme;
-
-    //const VariableGradient &_gradP;
-  
-    //MaterialProperty<Real> &_poro;
-    //MaterialProperty<RealTensorValue> &_K;
-    MaterialProperty<Real> &diffusion;
+    
+    
+    MaterialProperty<RealVectorValue> const &_a_l;
+    MaterialProperty<RealVectorValue> const &_a_t;
+    MaterialProperty<RealVectorValue> const &_a_n;
+    
+    MaterialProperty<RealTensorValue> &_K;
+    
     MaterialProperty<Real> &time_coefficient;
-    //MaterialProperty<RealVectorValue> &_U;
-    
+        
 protected:
   virtual void computeQpProperties();
 

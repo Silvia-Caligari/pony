@@ -33,7 +33,7 @@ protected:
 
   virtual Real computeQpJacobian() override;
     
-  MaterialProperty<Real> const & diffusion;
+  MaterialProperty<RealTensorValue> const &_K;
     
 };
 
