@@ -2,9 +2,9 @@
   [gmg]
    type = GeneratedMeshGenerator
    dim = 2
-   nx = 100
-   ny = 100
-   xmax = 2
+   nx = 64
+   ny = 64
+   xmax = 1
    ymax = 1 
   []
   #[./subdomain]
@@ -93,7 +93,7 @@
   [./Nonlinear]
      type = FHNionicfunction
      variable = u
-     uthresh = 0.25
+     uthresh = 0.1
      udepol = 1.0
      urest = 0.0
      alpha =  5.0 #ionic function coefficient f(u)=alpha*(u-u_rest)(u-u_thresh)(u-u_depol)
@@ -142,8 +142,10 @@
   solve_type = 'NEWTON'
   start_time = 0.0
   end_time = 200.0
-  dt = 0.01
-#  petsc_options = '-pc_svd_monitor -ksp_view_pmat'
+  dt = 0.25
+  #petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
+  #petsc_options_value='  preonly   lu       NONZERO               mumps '
+  #petsc_options = '-pc_svd_monitor -ksp_view_pmat'
 #  petsc_options_iname = '-pc_type'
 #  petsc_options_value = 'svd'
 []

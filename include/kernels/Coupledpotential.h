@@ -35,6 +35,6 @@ protected:
 private:
     
   //unsigned int _w_ind;
-  const VariableValue & _u;
+  const VariableValue & _v;
   Real _coef;
 };

@@ -30,7 +30,7 @@ Coupledpotential::validParams()
 
 Coupledpotential::Coupledpotential(const InputParameters & parameters) :
 Kernel(parameters),
-_u(coupledValueOld("coupled_variable")),
+_v(coupledValueOld("coupled_variable")),
 _coef(getParam<Real>("coef"))
 {}
 
@@ -38,7 +38,7 @@ Real
 Coupledpotential::computeQpResidual()
 {
     _coef = 0.1;
-  return -_coef * _u[_qp] * _test[_i][_qp];
+  return -_coef * _v[_qp] * _test[_i][_qp];
 }
 
 Real

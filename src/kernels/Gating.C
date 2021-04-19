@@ -35,7 +35,7 @@ Gating::validParams()
   Gating::computeQpResidual()
   {
       _coef = 0.025;
-    return _test[_i][_qp] * _coef * _u[_qp];
+    return _coef * _u[_qp] * _test[_i][_qp];
   }
 
   Real

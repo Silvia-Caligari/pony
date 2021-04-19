@@ -31,7 +31,7 @@ CoupledGating::validParams()
 CoupledGating::CoupledGating(const InputParameters & parameters) :
 Kernel(parameters),
 _w_ind(coupled("coupled_variable")),
-_w(coupledValue("coupled_variable")),
+_w(coupledValueOld("coupled_variable")),
 _coef(getParam<Real>("coef"))
 {
   if (_var.number() == _w_ind)
@@ -42,7 +42,8 @@ _coef(getParam<Real>("coef"))
 Real
 CoupledGating::computeQpResidual()
 {
-  return _coef * _w[_qp] * _test[_i][_qp];
+    return _coef * _w[_qp] * _test[_i][_qp];
+    //return -_coef * _w[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -57,5 +58,5 @@ CoupledGating::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _w_ind)
     return _coef * _phi[_j][_qp] * _test[_i][_qp];
   //else
-    return 0.0;
+    return 0;
 }
