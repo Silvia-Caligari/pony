@@ -1,20 +1,11 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
+#include "Potential_reaction.h"
 
-#include "FHNionicfunction.h"
+registerMooseObject("ponyApp",Potential_reaction);
 
-registerMooseObject("ponyApp",FHNionicfunction);
-
-defineLegacyParams(FHNionicfunction);
+defineLegacyParams(Potential_reaction);
 
 InputParameters
-FHNionicfunction::validParams()
+Potential_reaction::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("The nonlinear term f(u) = alpha*u*(u-beta)(gamma-u), with the weak "
@@ -27,7 +18,7 @@ FHNionicfunction::validParams()
   return params;
 }
 
-FHNionicfunction::FHNionicfunction(const InputParameters & parameters) :
+Potential_reaction::Potential_reaction(const InputParameters & parameters) :
 Kernel(parameters),
 _u_old(_var.slnOld()),
 _u_thresh(getParam<Real>("uthresh")),
@@ -40,7 +31,7 @@ _explicit(getParam<bool>("explicit"))
 
 
 Real
-FHNionicfunction::computeQpResidual()
+Potential_reaction::computeQpResidual()
 {
     if(_explicit)
     {
@@ -55,7 +46,7 @@ FHNionicfunction::computeQpResidual()
 }
 
 Real
-FHNionicfunction::computeQpJacobian()
+Potential_reaction::computeQpJacobian()
 {
     if(_explicit)
         
@@ -69,4 +60,3 @@ FHNionicfunction::computeQpJacobian()
         
     
 }
-

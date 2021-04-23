@@ -31,7 +31,8 @@ CoupledGating::validParams()
 CoupledGating::CoupledGating(const InputParameters & parameters) :
 Kernel(parameters),
 _w_ind(coupled("coupled_variable")),
-_w(coupledValueOld("coupled_variable")),
+_w(coupledValue("coupled_variable")),
+//_w(coupledValueOld("coupled_variable")),
 _coef(getParam<Real>("coef"))
 {
   if (_var.number() == _w_ind)
