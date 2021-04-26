@@ -68,7 +68,7 @@
      #block = 1
   #[../]
   [./FHNmaterials]
-     type = FHN
+     type = FHNagumo
      potential = u
      V_rest = 0.0
      V_thresh = 0.1
