@@ -28,7 +28,7 @@
 [Functions]
   [./ic_function1]
     type = ParsedFunction
-    value = '99.988*(x<0.05)*(y<0.05) - 84.000'
+    value = '104.1722*(x<0.05)*(y<0.05) - 84.0000'
   [../]
 []
 
@@ -68,7 +68,7 @@
      #block = 1
   #[../]
   [./BRmaterials]
-     type = BeelerReuter
+     type = LuoRudy
      potential = u
   [../]
 []
