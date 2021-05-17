@@ -40,10 +40,12 @@ _Ca_i_old(getMaterialPropertyOld<Real>("Ca_i"))
     E_Na = 50.0; // (mV) Sodium Nernst equilibrium potential
     G_s = 0.009; // slow inward calcium current conductance
     
+    _explicit = true; //= true Explicit Euler ... =false Implicit Euler
+    
 }
 
 
-void FHNagumo::initQpStatefulProperties()
+void BeelerReuter::initQpStatefulProperties()
 {
     _m[_qp] = 0.0;
     _h[_qp] = 0.0;
@@ -55,18 +57,12 @@ void FHNagumo::initQpStatefulProperties()
     
 }
 
-void FHNagumo::computeQpProperties()
+void BeelerReuter::computeQpProperties()
 {
     //initialization
     
     V = _V_old[_qp];
     
-    explicit = true; //= true Explicit Euler ... =false Implicit Euler
-    
-    
-    //update Calcium dynamics
-
-    _Ca_i[_qp] = update_Ca(Real _Ca_i_old[_qp], Real _dt);
     
     //update Calcium Equilibrium Potential
     
@@ -75,11 +71,11 @@ void FHNagumo::computeQpProperties()
     //update Gating
     
     _m[_qp] = update_m(V, _m_old[_qp], _dt);
-    _h[_qp] = update_h(Real V, _h_old[_qp], _dt);
-    _j[_qp] = update_j(Real V, Real _j_old[_qp], Real _dt);
-    _d[_qp] = update_d(Real V, Real _d_old[_qp], Real _dt);
-    _f[_qp] = update_f(Real V, Real _f_old[_qp], Real _dt);
-    _x1[_qp] = update_x1(Real V, Real _x1_old[_qp], Real _dt);
+    _h[_qp] = update_h(V, _h_old[_qp], _dt);
+    _j[_qp] = update_j(V, _j_old[_qp], _dt);
+    _d[_qp] = update_d(V, _d_old[_qp], _dt);
+    _f[_qp] = update_f(V, _f_old[_qp], _dt);
+    _x1[_qp] = update_x1(V, _x1_old[_qp], _dt);
     
     // Compute Ionic Functions
     
@@ -91,15 +87,21 @@ void FHNagumo::computeQpProperties()
     
     _I_ion[_qp] = i_K1 + i_x1 + i_Na + i_s;
     
+    
+    //update Calcium dynamics
+
+    _Ca_i[_qp] = update_Ca(_Ca_i_old[_qp], _dt, i_s);
 
 }
 
 inline Real BeelerReuter::update_m(Real V, Real m_old, Real dt){
     
+    Real m;
+    
     alpha_m = ((0.0*std::exp(0.0*(V+47.0))-1.0*(V+47.0))/(std::exp(-0.1*(V+47.0))-1.0));
     beta_m = ((40.0*std::exp(-0.056*(V+72.0))+0.0*(V+0.0))/(std::exp(0.0*(V+72.0))+0.0));
     
-    if (explicit){
+    if (_explicit){
     //Explicit Euler
            m = (1.0 - dt * (alpha_m+beta_m)) * m_old + dt * alpha_m;
     }
@@ -114,10 +116,12 @@ inline Real BeelerReuter::update_m(Real V, Real m_old, Real dt){
 
 inline Real BeelerReuter::update_h(Real V, Real h_old, Real dt){
     
+    Real h;
+    
     alpha_h = ((0.126*std::exp(-0.25*(V+77.0))+0.0*(V+0.0))/(std::exp(0.0*(V+77.0))+0.0));
     beta_h = ((1.7*std::exp(0.0*(V+22.5))+0.0*(V+0.0))/(std::exp(-0.082*(V+22.5))+1.0));
     
-    if (explicit){
+    if (_explicit){
     //Explicit Euler
            h = (1.0 - dt * (alpha_h+beta_h)) * h_old + dt * alpha_h;
     }
@@ -130,12 +134,14 @@ inline Real BeelerReuter::update_h(Real V, Real h_old, Real dt){
     return h;
 }
 
-inline Real BeelerReuter::update_j(Real V, Real h_old, Real dt){
+inline Real BeelerReuter::update_j(Real V, Real j_old, Real dt){
+    
+    Real j;
     
     alpha_j = ((0.055*std::exp(-0.25*(V+78.0))+0.0*(V+0.0))/(std::exp(-0.2*(V+78.0))+1.0));
     beta_j = ((0.3*std::exp(0.0*(V+32.0))+0.0*(V+0.0))/(std::exp(-0.1*(V+32.0))+1.0));
     
-    if (explicit){
+    if (_explicit){
     //Explicit Euler
            j = (1.0 - dt * (alpha_j+beta_j)) * j_old + dt * alpha_j;
     }
@@ -151,10 +157,12 @@ inline Real BeelerReuter::update_j(Real V, Real h_old, Real dt){
 
 inline Real BeelerReuter::update_d(Real V, Real d_old, Real dt){
     
+    Real d;
+    
     alpha_d = ((0.095*std::exp(-0.01*(V-5.0))+0.0*(V+0.0))/(std::exp(-0.072*(V-5.0))+1.0));
     beta_d = ((0.07*std::exp(-0.017*(V+44.0))+0.0*(V+0.0))/(std::exp(0.05*(V+44.0))+1.0));
     
-    if (explicit){
+    if (_explicit){
     //Explicit Euler
            d = (1.0 - dt * (alpha_d+beta_d)) * d_old + dt * alpha_d;
     }
@@ -170,10 +178,12 @@ inline Real BeelerReuter::update_d(Real V, Real d_old, Real dt){
 
 inline Real BeelerReuter::update_f(Real V, Real f_old, Real dt){
     
+    Real f;
+    
     alpha_f = ((0.012*std::exp(-0.008*(V+28.0))+0.0*(V+0.0))/(std::exp(0.15*(V+28.0))+1.0));
     beta_f = ((0.0065*std::exp(-0.02*(V+30.0))+0.0*(V+0.0))/(std::exp(-0.2*(V+30.0))+1.0));
     
-    if (explicit){
+    if (_explicit){
     //Explicit Euler
            f = (1.0 - dt * (alpha_f+beta_f)) * f_old + dt * alpha_f;
     }
@@ -189,10 +199,12 @@ inline Real BeelerReuter::update_f(Real V, Real f_old, Real dt){
 
 inline Real BeelerReuter::update_x1(Real V, Real x1_old, Real dt){
     
+    Real x1;
+    
     alpha_x1 = ((0.0005*std::exp(0.083*(V+50.0))+0.0*(V+0.0))/(std::exp(0.057*(V+50.0))+1.0));
     beta_x1 = ((0.0013*std::exp(-0.06*(V+20.0))+0.0*(V+0.0))/(std::exp(-0.04*(V+20.0))+1.0));
     
-    if (explicit){
+    if (_explicit){
     //Explicit Euler
            x1 = (1.0 - dt * (alpha_x1+beta_x1)) * x1_old + dt * alpha_x1;
     }
@@ -206,18 +218,13 @@ inline Real BeelerReuter::update_x1(Real V, Real x1_old, Real dt){
     
 }
 
-inline Real BeelerReuter::update_Ca(Real V, Real Ca_old, Real dt){
+inline Real BeelerReuter::update_Ca(Real Ca_old, Real dt, Real I_s){
     
-    if (explicit){
+    Real Ca;
+    
     //Explicit Euler
-        Ca = - pow(10, -7) * (i_s + 0.07) * _dt + (1 - 0.07) * _Ca_i_old[_qp];
-    }
-    
-    else{
-        //Implicit Euler
-        x1 = (x1_old + dt * alpha_x1)/(1.0 + dt * (alpha_x1+beta_x1));
-    }
-    
+        Ca = - pow(10, -7) * (I_s + 0.07) * dt + (1 - 0.07) * Ca_old;
+
     return Ca;
     
 }

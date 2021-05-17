@@ -2,21 +2,21 @@
 
 #include "Kernel.h"
 
-class FHNionicfunction;
+class Ionicfunction;
 
 template <>
-InputParameters validParams<FHNionicfunction>();
+InputParameters validParams<Ionicfunction>();
 
 
 /**
  * This kernel implements the non linear term alpha*u*(u-\beta)(\delta-u)
  */
-class FHNionicfunction : public Kernel
+class Ionicfunction : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  FHNionicfunction(const InputParameters & parameters);
+  Ionicfunction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

@@ -1,11 +1,11 @@
-#include "FHNionicfunction.h"
+#include "Ionicfunction.h"
 
-registerMooseObject("ponyApp",FHNionicfunction);
+registerMooseObject("ponyApp",Ionicfunction);
 
-defineLegacyParams(FHNionicfunction);
+defineLegacyParams(Ionicfunction);
 
 InputParameters
-FHNionicfunction::validParams()
+Ionicfunction::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("The nonlinear term f(u) = alpha*u*(u-beta)(gamma-u)-c*w, with the weak "
@@ -14,7 +14,7 @@ FHNionicfunction::validParams()
   return params;
 }
 
-FHNionicfunction::FHNionicfunction(const InputParameters & parameters) :
+Ionicfunction::Ionicfunction(const InputParameters & parameters) :
 Kernel(parameters),
 _I_ion(getMaterialProperty<Real>("I_ion"))
 {}
@@ -22,7 +22,7 @@ _I_ion(getMaterialProperty<Real>("I_ion"))
 
 
 Real
-FHNionicfunction::computeQpResidual()
+Ionicfunction::computeQpResidual()
 {
     
         return _I_ion[_qp] * _test[_i][_qp];
@@ -30,7 +30,7 @@ FHNionicfunction::computeQpResidual()
 }
 
 Real
-FHNionicfunction::computeQpJacobian()
+Ionicfunction::computeQpJacobian()
 {
         
         return 0;

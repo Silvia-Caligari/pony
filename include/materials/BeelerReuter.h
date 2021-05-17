@@ -70,15 +70,9 @@ protected:
     
     Real beta_m, beta_h, beta_j, beta_d, beta_f, beta_x1;
     
-    const Real G_Na;
+    Real G_Na, G_NaC, E_Na, G_s;
     
-    const Real G_NaC;
-    
-    const Real E_Na;
-    
-    const Real G_s;
-    
-    bool explicit;
+    bool _explicit;
     
     inline Real update_m(Real V, Real m_old, Real dt);
     
@@ -92,7 +86,7 @@ protected:
     
     inline Real update_x1(Real V, Real x1_old, Real dt);
     
-    inline Real update_Ca(Real Ca_old, Real dt);
+    inline Real update_Ca(Real Ca_old, Real dt, Real I_s);
 
 };
 
