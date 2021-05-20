@@ -24,6 +24,8 @@ protected:
     
     MaterialProperty<Real> &_I_ion;
     
+    MaterialProperty<Real> &_I_stim;
+    
     MaterialProperty<Real> &_m;
     
     MaterialProperty<Real> &_h;
@@ -73,6 +75,8 @@ protected:
     Real G_Na, G_NaC, E_Na, G_s;
     
     bool _explicit;
+    
+    Real _m_start, _h_start, _j_start, _d_start, _f_start, _x_start, _Ca_start;
     
     inline Real update_m(Real V, Real m_old, Real dt);
     

@@ -17,6 +17,7 @@ BeelerReuter::BeelerReuter(const InputParameters &parameters) :
 Material(parameters),
 _V_old(coupledValueOld("potential")),
 _I_ion(declareProperty<Real>("I_ion")),
+_I_stim(declareProperty<Real>("I_stim")),
 _m(declareProperty<Real>("m")),
 _h(declareProperty<Real>("h")),
 _j(declareProperty<Real>("j")),
@@ -42,18 +43,26 @@ _Ca_i_old(getMaterialPropertyOld<Real>("Ca_i"))
     
     _explicit = true; //= true Explicit Euler ... =false Implicit Euler
     
+    _m_start = 0.0;
+    _h_start = 0.0;
+    _j_start = 0.0;
+    _d_start = 0.0;
+    _f_start = 0.0;
+    _x_start = 0.0;
+    _Ca_start = 0.0002;
+    
 }
 
 
 void BeelerReuter::initQpStatefulProperties()
 {
-    _m[_qp] = 0.0;
-    _h[_qp] = 0.0;
-    _j[_qp] = 0.0;
-    _d[_qp] = 0.0;
-    _f[_qp] = 0.0;
-    _x1[_qp] = 0.0;
-    _Ca_i[_qp] = 0.0004;
+    _m[_qp] = _m_start;
+    _h[_qp] = _h_start;
+    _j[_qp] = _j_start;
+    _d[_qp] = _d_start;
+    _f[_qp] = _f_start;
+    _x1[_qp] = _x_start;
+    _Ca_i[_qp] = _Ca_start;
     
 }
 
@@ -70,27 +79,98 @@ void BeelerReuter::computeQpProperties()
 
     //update Gating
     
+    if (_t_step == 1){
+        
+        _m[_qp] = update_m(V, _m_start, _dt);
+ 
+        
+        _h[_qp] = update_h(V, _h_start, _dt);
+
+        
+        _j[_qp] = update_j(V, _j_start, _dt);
+
+        
+        _d[_qp] = update_d(V, _d_start, _dt);
+
+        
+        _f[_qp] = update_f(V, _f_start, _dt);
+
+        
+        _x1[_qp] = update_x1(V, _x_start, _dt);
+
+    }
+    
+    else {
     _m[_qp] = update_m(V, _m_old[_qp], _dt);
+
+        
     _h[_qp] = update_h(V, _h_old[_qp], _dt);
+
+        
     _j[_qp] = update_j(V, _j_old[_qp], _dt);
+
+        
     _d[_qp] = update_d(V, _d_old[_qp], _dt);
+
+        
     _f[_qp] = update_f(V, _f_old[_qp], _dt);
+
+        
     _x1[_qp] = update_x1(V, _x1_old[_qp], _dt);
+
+        
+    }
     
     // Compute Ionic Functions
     
     i_K1 = 0.35*((4*(std::exp(0.04*(V+85.0))-1.0))/(std::exp(0.08*(V+53.0)) + std::exp(0.04*(V+53.0)))+(0.2*(V+23.0))/(1.0 - std::exp(-0.04*(V+23.0))));
+
     I_X1 = 0.8*(std::exp(0.04*(V+77.0))-1.0)/(std::exp(0.04*(V+35.0)));
-    i_x1 = I_X1 * _x1[_qp];
-    i_Na = (G_Na * pow(_m[_qp], 3) * _h[_qp] * _j[_qp] + G_NaC) * (V - E_Na);
-    i_s = G_s * _d[_qp] * _f[_qp] * (V - E_s);
     
-    _I_ion[_qp] = i_K1 + i_x1 + i_Na + i_s;
+    i_x1 = I_X1 * _x1[_qp];
+
+    
+    i_Na = (G_Na * pow(_m[_qp], 3) * _h[_qp] * _j[_qp] + G_NaC) * (V - E_Na);
+    
+    i_s = G_s * _d[_qp] * _f[_qp] * (V - E_s);
+
+    
+    
+    //Compute Stimulus current
+    Real x_point = _q_point[_qp](0);
+    Real y_point = _q_point[_qp](1);
+    
+    if (((x_point*x_point)+(y_point*y_point)<0.025) && (_t>= 0.0) && (_t <= 2.0)){
+        
+        _I_stim[_qp] = -250.0;
+    }
+    
+    else
+        
+        _I_stim[_qp] = 0.0;
+     
+    
+    
+    //compute Ionic current
+    
+    _I_ion[_qp] = i_K1 + i_x1 + i_Na + i_s + _I_stim[_qp];
     
     
     //update Calcium dynamics
+    
+    if (_t_step ==1){
+        
+        _Ca_i[_qp] = update_Ca(_Ca_start, _dt, i_s);
+
+        
+    }
+    
+    else{
 
     _Ca_i[_qp] = update_Ca(_Ca_i_old[_qp], _dt, i_s);
+
+    
+    }
 
 }
 
@@ -223,7 +303,7 @@ inline Real BeelerReuter::update_Ca(Real Ca_old, Real dt, Real I_s){
     Real Ca;
     
     //Explicit Euler
-        Ca = - pow(10, -7) * (I_s + 0.07) * dt + (1 - 0.07) * Ca_old;
+        Ca = - pow(10, -7) * (I_s - 0.07) * dt + (1 - 0.07) * Ca_old;
 
     return Ca;
     

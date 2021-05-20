@@ -8,7 +8,7 @@ InputParameters
 Ionicfunction::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addClassDescription("The nonlinear term f(u) = alpha*u*(u-beta)(gamma-u)-c*w, with the weak "
+  params.addClassDescription("The nonlinear term f(u) = ionic function "
                              "form of $(\\phi_i, f(u))$.");
 
   return params;
@@ -26,6 +26,7 @@ Ionicfunction::computeQpResidual()
 {
     
         return _I_ion[_qp] * _test[_i][_qp];
+    
    
 }
 

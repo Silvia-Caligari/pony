@@ -2,8 +2,8 @@
   [gmg]
    type = GeneratedMeshGenerator
    dim = 2
-   nx = 100
-   ny = 100
+   nx = 64
+   ny = 64
    xmax = 1
    ymax = 1 
   []
@@ -28,7 +28,7 @@
 [Functions]
   [./ic_function1]
     type = ParsedFunction
-    value = '99.988*(x<0.05)*(y<0.05) - 84.000'
+    value = '- 84.000'
   [../]
 []
 
@@ -110,7 +110,7 @@
   type = Transient
   solve_type = 'NEWTON'
   start_time = 0.0
-  end_time = 500.0
+  end_time = 200.0
   dt = 0.01
   #petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
   #petsc_options_value='  preonly   lu       NONZERO               mumps '
