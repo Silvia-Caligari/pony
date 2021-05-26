@@ -80,6 +80,18 @@ protected:
     
     Real _m_start, _h_start, _j_start, _d_start, _f_start, _x_start, _Ca_start;
     
+    inline Real init_m(Real V);
+    
+    inline Real init_h(Real V);
+    
+    inline Real init_j(Real V);
+    
+    inline Real init_d(Real V);
+    
+    inline Real init_f(Real V);
+    
+    inline Real init_x(Real V);
+    
     inline Real update_m(Real V, Real m_old, Real dt);
     
     inline Real update_h(Real V, Real h_old, Real dt);
