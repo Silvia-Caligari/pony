@@ -28,7 +28,7 @@
 [Functions]
   [./ic_function1]
     type = ParsedFunction
-    value = '- 84.000'
+    value = '-84.0'
   [../]
 []
 
@@ -67,9 +67,9 @@
      #Chi = 1.0 #surface per volume 
      #block = 1
   #[../]
-  [./BRmaterials]
-     type = BeelerReuter
-     potential = u
+  [./FHNmaterials]
+     type = LuoRudy
+     potential = u  
   [../]
 []
 
@@ -110,8 +110,8 @@
   type = Transient
   solve_type = 'NEWTON'
   start_time = 0.0
-  end_time = 300.0
-  dt = 0.01
+  end_time = 500
+  dt = 0.02
   #petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
   #petsc_options_value='  preonly   lu       NONZERO               mumps '
   #petsc_options = '-pc_svd_monitor -ksp_view_pmat'

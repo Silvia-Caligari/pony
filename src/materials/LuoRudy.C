@@ -85,7 +85,6 @@ void LuoRudy::computeQpProperties()
 {
     
     V = _V_old[_qp];
-    Real V_start = -84.0;
     
     //update Calcium Equilibrium Potential
     

@@ -44,10 +44,10 @@ _Ca_i_old(getMaterialPropertyOld<Real>("Ca_i"))
     _explicit = true; //= true Explicit Euler ... =false Implicit Euler
     
     _m_start = 0.0;
-    _h_start = 0.0;
-    _j_start = 0.0;
+    _h_start = 1.0;
+    _j_start = 1.0;
     _d_start = 0.0;
-    _f_start = 0.0;
+    _f_start = 1.0;
     _x_start = 0.0;
     _Ca_start = 0.0002;
     
@@ -140,9 +140,9 @@ void BeelerReuter::computeQpProperties()
     Real x_point = _q_point[_qp](0);
     Real y_point = _q_point[_qp](1);
     
-    if (((x_point*x_point)+(y_point*y_point)<0.025) && (_t>= 0.0) && (_t <= 2.0)){
+    if (((x_point*x_point)+(y_point*y_point)<0.025) && (_t>= 0.0) && (_t <= 1.0)){
         
-        _I_stim[_qp] = -250.0;
+        _I_stim[_qp] = -100.0;
     }
     
     else
