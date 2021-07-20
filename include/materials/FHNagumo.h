@@ -41,6 +41,8 @@ protected:
     
     MaterialProperty<Real> &_I_ion;
     
+    MaterialProperty<Real> &_I_stim;
+    
     MaterialProperty<Real> &_w;
     
     const MaterialProperty<Real> &_w_old;

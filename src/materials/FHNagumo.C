@@ -31,6 +31,7 @@ beta(getParam<Real>("beta")),
 delta(getParam<Real>("delta")),
 gamma(getParam<Real>("gamma")),
 _I_ion(declareProperty<Real>("I_ion")),
+_I_stim(declareProperty<Real>("I_stim")),
 _w(declareProperty<Real>("w")),
 _w_old(getMaterialPropertyOld<Real>("w"))
 
@@ -54,6 +55,22 @@ void FHNagumo::computeQpProperties()
     
     w = _w[_qp];
     
+    /*
+    //Compute Stimulus current
+    Real x_point = _q_point[_qp](0);
+    Real y_point = _q_point[_qp](1);
+    
+    //if((x_point<0.04) && (_t>= 0.0) && (_t <= 1.0)){
+    if ((x_point<0.04)&&(y_point<0.04) && (_t>= 0.0) && (_t <= 1.0)){
+        
+        _I_stim[_qp] = -100.0;
+    }
+    
+    else
+        
+        _I_stim[_qp] = 0.0;
+     */
+    
     // Compute Ionic Function
     
     _I_ion[_qp] = alpha * (V - V_depol) * (V - V_thresh) * (V - V_rest) + beta * w;
@@ -61,6 +78,4 @@ void FHNagumo::computeQpProperties()
    
 
 }
-
-
 
