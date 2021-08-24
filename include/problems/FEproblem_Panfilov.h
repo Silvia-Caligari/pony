@@ -4,6 +4,12 @@
 #include "FEProblem.h"
 #include "libmesh/transient_system.h"
 
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/mesh.h"
+#include "libmesh/distributed_mesh.h"
+
+#include "EPmaterialsNew.h"
+
 class FEproblem_Panfilov;
 
 template <>
@@ -24,12 +30,23 @@ public:
     
     virtual void solve() override;
     
+    virtual void computeResidual(const NumericVector< Number > & soln, NumericVector< Number > &     residual) override;
+    
+    virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian) override;
+    
 
 
 protected:
     
     TransientNonlinearImplicitSystem & _system;
     std::unique_ptr<NumericVector<Number>> & _solutionPointer;
+    MeshBase & _meshSystem;
+    DofMap & _dof_map;
+    
+    Assembly & _myAssembly;
+    QBase const * const & _qrule;
+    
+   const std::string &_material_name;
     Real _alpha;
     Real _theta;
     Real k;
@@ -48,7 +65,11 @@ protected:
     
     bool _method;
     
+    bool _howsolve;
+    
     std::vector<Number> _w;
+    
+    unsigned int _dim;
         
     virtual void solveL1(Real _alpha, Real _theta, Real k, Real a, Real e0, Real mu_1, Real mu_2, std::vector<Number> &_w);
     

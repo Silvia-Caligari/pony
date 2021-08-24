@@ -8,14 +8,17 @@
    mu_1 = 0.2
    mu_2 = 0.3
    method = 0 #(method = 0 predictor-corrector, method =1 Newton-Method)
+   how_solve = 1
+   material_name = 'materials_new'
+   kernel_coverage_check = false
 []
 
 [Mesh]
   [gmg]
    type = GeneratedMeshGenerator
    dim = 2
-   nx = 64
-   ny = 64
+   nx = 100
+   ny = 100
    xmax = 1
    ymax = 1 
   []
@@ -53,61 +56,32 @@
 []
 
 [Materials]
-  [./fibers_base]
-     type = EPfibersdirections
+  [./materials_new]
+     type = EPmaterialsNew
      a_l = '1 0 0'
      a_t = '0 1 0'
-     block = 0
-  [../] 
-  #[./fibers_base_subdomain]
-     #type = EPfibersdirections
-     #a_l = '1 0 0'
-     #a_t = '0 1 0'
-     #block = 1
-  #[../] 
-  [./materials_electrophysiology] 
-     type = EPmaterials
      sigma_i = '0.001 0.001 0'
      C_m = 1.0 #membrane conductance
      Chi = 1.0 #surface per volume 
-     #block = 0 
   [../]
-  #[./materials_electrophysiology_subdomain] 
-     #type = EPmaterials
-     #sigma_i = '0.0001 0.001 0'
-     #C_m = 1.0 #membrane conductance
-     #Chi = 1.0 #surface per volume 
-     #block = 1
-  #[../]
-  #[./FHNmaterials]
-     #type = FHNagumo
-     #potential = u
-     #V_rest = 0.0
-     #V_thresh = 0.1
-     #V_depol = 1.0
-     #alpha = 5.0
-     #beta = 1.0
-     #delta = 0.1
-     #gamma = 0.025  
-  #[../]
 []
 
-[Kernels]
-  [./diff]
-     type = EPdiffusion
-     variable = u
-  [../]
-  [./timederivative]
-     type = EPtimederivative
-     variable = u
-     order = 2 #order of time discretization (=1 or =2)
-  [../]
+#[Kernels]
+  #[./diff]
+     #type = EPdiffusion
+     #variable = u
+  #[../]
+  #[./timederivative]
+     #type = EPtimederivative
+     #variable = u
+     #order = 2 #order of time discretization (=1 or =2)
+  #[../]
   #[./Nonlinear]
      #type = Ionicfunction
      #variable = u
      #explicit = true # =true if explicit or =false if implicit
   #[../]
-[]
+#[]
 
 #[AuxKernels]
 #[./activation]
