@@ -1,11 +1,13 @@
 [Mesh]
   [gmg]
    type = GeneratedMeshGenerator
-   dim = 2
+   dim = 3
    nx = 64
    ny = 64
+   nz = 10
    xmax = 1
-   ymax = 1 
+   ymax = 1
+   zmax = 0.15 
   []
   #[./subdomain]
    #type = ParsedSubdomainMeshGenerator
@@ -45,6 +47,7 @@
      type = EPfibersdirections
      a_l = '1 0 0'
      a_t = '0 1 0'
+     a_n = '0 0 1'
      block = 0
   [../] 
   #[./fibers_base_subdomain]
@@ -55,7 +58,7 @@
   #[../] 
   [./materials_electrophysiology] 
      type = EPmaterials
-     sigma_i = '0.001 0.001 0'
+     sigma_i = '0.001 0.001 0.0001'
      C_m = 1.0 #membrane conductance
      Chi = 1.0 #surface per volume 
      block = 0 
@@ -67,7 +70,7 @@
      #Chi = 1.0 #surface per volume 
      #block = 1
   #[../]
-  [./FHNmaterials]
+  [./LRmaterials]
      type = LuoRudy
      potential = u  
   [../]

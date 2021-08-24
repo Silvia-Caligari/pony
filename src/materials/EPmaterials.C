@@ -6,16 +6,16 @@ defineLegacyParams(EPmaterials);
 
 InputParameters EPmaterials::validParams()
 {
-	InputParameters params = Material::validParams();
+    InputParameters params = Material::validParams();
 
-	
-	
-	params.addRequiredParam<RealVectorValue>("sigma_i","forgot intracellular diffusion coefficients");
+    
+    
+    params.addRequiredParam<RealVectorValue>("sigma_i","forgot intracellular diffusion coefficients");
     //params.addRequiredParam<Real>("sigma_e_l","forgot extracellular diffusion coefficient _l");
     //params.addParam<RealVectorValue>("sigma_e","forgot extracellular diffusion coefficients");
     params.addRequiredParam<Real>("C_m","forgot membrane conductance");
     params.addRequiredParam<Real>("Chi","forgot surface per volume");
-	return params;
+    return params;
 }
 
 EPmaterials::EPmaterials(const InputParameters &parameters) :
@@ -74,11 +74,8 @@ EPmaterials::computeQpProperties()
     
     
     /*Real x_point = _q_point[_qp](0);
-
     Real y_point = _q_point[_qp](1);
-
     if (((x_point*x_point)+(y_point*y_point)) < 0.25)
-
             _diffusion[_qp] = _diffusion_2;*/
     
     time_coefficient[_qp] = C_m * Chi;
@@ -86,5 +83,4 @@ EPmaterials::computeQpProperties()
     
 
 }
-
 

@@ -1,7 +1,7 @@
 #include "MyFEproblem.h"
 #include "NonlinearSystemBase.h"
 #include "DisplacedProblem.h"
-
+#include "Assembly.h"
 
 registerMooseObject("ponyApp",MyFEproblem);
 
@@ -22,6 +22,8 @@ MyFEproblem::validParams()
     params.addRequiredParam<Real>("delta","v coefficient in w equation");
     params.addRequiredParam<Real>("gamma","w coefficient in w equation");
     params.addRequiredParam<bool>("method","Newton or Halley method");
+    params.addRequiredParam<bool>("how_solve","how_solve_system");
+    params.addRequiredParam<std::string>("material_name", "material_name");
 
   return params;
 }
@@ -30,6 +32,16 @@ MyFEproblem::MyFEproblem(const InputParameters & parameters):
 FEProblem(parameters),
 _system(_eq.get_system<TransientNonlinearImplicitSystem>("nl0")),
 _solutionPointer(_system.solution),
+_meshSystem(_system.get_mesh()),
+_dof_map(_system.get_dof_map()),
+_myAssembly(assembly(0)),
+_qrule(_myAssembly.qRule()),
+_material_name(getParam<std::string>("material_name")),
+//_materialBase(*getMaterial(_material_name.c_str(),Moose::BLOCK_MATERIAL_DATA,0,true)),
+//_epmaterials(dynamic_cast<EPmaterialsNew &>(_materialBase)),
+
+//M(_system.get_system_matrix()),
+//A(_system.get_system_matrix()),
 _alpha(getParam<Real>("alpha")),
 _theta(getParam<Real>("theta")),
 _c(getParam<Real>("c")),
@@ -39,19 +51,116 @@ u_dep(getParam<Real>("u_dep")),
 beta(getParam<Real>("beta")),
 delta(getParam<Real>("delta")),
 gamma(getParam<Real>("gamma")),
-_method(getParam<bool>("method"))
+_method(getParam<bool>("method")),
+_howsolve(getParam<bool>("how_solve"))
 {}
 
 
 void MyFEproblem::initialSetup(){
 
     FEProblem::initialSetup();
- 
+    
     NumericVector<Number> * sol=_solutionPointer.get();
     
     _w.assign(sol[0].last_local_index() - sol[0].first_local_index(), 0.0);
+
+    
+    if(_howsolve){
+    MaterialBase & _materialBase(*getMaterial(_material_name.c_str(),Moose::BLOCK_MATERIAL_DATA,0,true));
+    EPmaterialsNew & _epmaterials(dynamic_cast<EPmaterialsNew &>(_materialBase));
+ 
+    
     
     //std::cout<<"length:"<<sol[0].last_local_index() - sol[0].first_local_index()<<std::endl;
+    
+    _dim = _meshSystem.mesh_dimension();
+    
+    SparseMatrix<Number> & M = _system.add_matrix("mass");  //Mass Matrix
+    SparseMatrix<Number> & A = _system.add_matrix("stiff");//Stiffness Matrix * Tensor Diffusion
+    
+    SparseMatrix<Number> & A1 = _system.add_matrix("rhs_linear_system"); //A1 = (M/dt - (1-theta)A)
+    SparseMatrix<Number> & A2 = _system.get_system_matrix(); //A2 = (M/dt + theta*A)
+    
+    //_eq.init();
+    
+    
+    M.zero();
+    A.zero();
+    A1.zero();
+    A2.zero();
+
+    
+    FEType fe_type = _dof_map.variable_type(0);
+    
+    ////FEM information///
+     
+    std::unique_ptr<FEBase> fe (FEBase::build(_dim, fe_type));
+    std::unique_ptr<QBase> qrule( QBase::build (_qrule->type(),_dim,_qrule->get_order()));
+    fe->attach_quadrature_rule (qrule.get());
+    
+    std::vector<Real>                       const & JxW = fe->get_JxW();
+    std::vector<std::vector<Real> >         const & phi = fe->get_phi();
+    std::vector<std::vector<RealGradient> > const & dphi = fe->get_dphi();
+    std::vector<Point>                      const & q_points = fe->get_xyz();
+    
+    std::vector<dof_id_type> dof_indices;
+    
+    //local matrix
+    
+    DenseMatrix<Number> ke;
+    DenseMatrix<Number> kem;
+    
+    //active elements
+    
+    MeshBase::const_element_iterator           el = _meshSystem.active_local_elements_begin();
+    MeshBase::const_element_iterator const end_el = _meshSystem.active_local_elements_end();
+    
+    
+    std::vector<RealTensorValue> diffusion;
+    
+    //start element loop
+    
+    for ( ; el != end_el; ++el)
+      {
+        Elem const * elem = *el;
+        
+        fe->reinit (elem);
+        _dof_map.dof_indices(elem, dof_indices);
+
+        unsigned int const n_dofs = cast_int<unsigned int>(dof_indices.size());
+
+        ke.resize (n_dofs , n_dofs);
+        ke.zero();
+          
+        kem.resize (n_dofs , n_dofs);
+        kem.zero();
+         
+        _epmaterials.getDiffusion(q_points, diffusion);
+          
+        for (unsigned int i=0; i<phi.size(); i++)
+          for (unsigned int j=0; j<phi.size(); j++)
+            for (unsigned int qp=0; qp<qrule->n_points(); qp++)
+            {
+              ke(i,j) +=  JxW[qp] * ( dphi[j][qp] * (diffusion.at(qp) *  dphi[i][qp]) );
+              
+              kem(i,j) +=  JxW[qp] * ( phi[j][qp] * phi[i][qp] );
+            }
+          
+          A.add_matrix(ke, dof_indices );
+          M.add_matrix(kem, dof_indices );
+          
+          A1.add_matrix(ke, dof_indices );
+          A2.add_matrix(ke, dof_indices );
+      } //end element loop
+    
+    A.close();
+    M.close();
+    A1.close();
+    A2.close();
+        
+    
+    }
+  
     
 }
 
@@ -103,10 +212,8 @@ void MyFEproblem::solve()
   // the old converged reason "DIVERGED_NANORINF", when
   // we throw  an exception and stop solve
   //_fail_next_linear_convergence_check = false;
-  
-    //std::cout<<sol[0].size()<<std::endl
     
-    
+ 
 
     //////////////////////////////////////////////////////////////////////////
     solveL1(_alpha, _theta, _c, u_rest, u_thresh, u_dep, _w, beta, delta, gamma);
@@ -117,13 +224,13 @@ void MyFEproblem::solve()
     
     if (_solve){
     _nl->solve();
-    
+    }
     Real alpha_bis = 1.0 - _alpha;
     
     solveL1(alpha_bis, _theta, _c, u_rest, u_thresh, u_dep, _w, beta, delta, gamma);
         //solveL1(alpha_bis, _theta, _c, u_rest, u_thresh, u_dep);
         
-    }
+//}
 
   if (_solve)
     _nl->update();
@@ -153,6 +260,7 @@ void MyFEproblem::solveL1(Real _alpha, Real _theta, Real _c, Real u_rest, Real u
     //NumericVector<Number> * sol=solutionPointer.get();
     
     NumericVector<Number> * sol=_solutionPointer.get();
+
    
     
     for(int i=sol[0].first_local_index(); i<sol[0].last_local_index(); ++i){
@@ -216,6 +324,8 @@ void MyFEproblem::solveL1(Real _alpha, Real _theta, Real _c, Real u_rest, Real u
     
     sol[0].close();
     
+    _system.update();
+    
 }
 
 inline Real MyFEproblem::Function(Real _alpha, Real _theta, Real _c, Real v0, Real u_rest, Real u_thresh, Real u_dep, Real v, Real w){
@@ -260,3 +370,93 @@ inline Real MyFEproblem::DDFunction(Real _alpha, Real _theta, Real _c, Real u_re
     return ddF;
     
 }
+
+
+void MyFEproblem::computeResidual(const NumericVector< Number > & soln, NumericVector<Number> &     residual){
+    
+    NumericVector<Number> * sol=_solutionPointer.get();
+    
+    if(_howsolve){
+        
+        
+        
+        SparseMatrix<Number> & M = _system.get_matrix("mass");
+        
+        SparseMatrix<Number> & A = _system.get_matrix("stiff");
+        
+        
+        //SparseMatrix<Number> & RHS = _system.get_matrix("rhs_linear_system"); //A1 = (M/dt - (1-theta)A)
+        
+        SparseMatrix<Number> & S = _system.get_system_matrix();
+        
+        //RHS.zero();
+        S.zero();
+        
+        //RHS.add(1.0/_dt,M);
+        //RHS.add(-(1.0 - _theta), A);
+
+        S.add(1.0/_dt,M);
+        S.add(_theta, A);
+        
+        //RHS.close();
+        S.close();
+        
+        A.vector_mult(residual,sol[0]);
+        
+        /*sol[0] *= -1.0;
+        
+        sol[0].close();
+        
+        S.vector_mult_add(residual,sol[0]);
+        
+        sol[0] *= -1.0;
+         */
+        
+        //sol[0].close();
+        
+        residual.close();
+        
+        
+        residual.print_matlab("residual1.m");
+        //sol[0].print_matlab("sol1.m");
+        //soln.print_matlab("soln1.m");
+    
+        
+    }
+     
+    else{
+        
+    FEProblemBase::computeResidual(soln, residual);
+    
+   
+    
+    residual.print_matlab("residual2.m");
+    //sol[0].print_matlab("sol2.m");
+    //soln.print_matlab("soln2.m");
+        
+    }
+    
+}
+
+void MyFEproblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian){
+    
+    if(_howsolve){
+        
+    }
+    
+    
+    else
+        
+        FEProblemBase::computeJacobian(soln, jacobian);
+    
+
+    /*SparseMatrix<Number> & S = _system.get_system_matrix();
+    
+    S.print_matlab("ciao2.m");
+    
+    jacobian.print_matlab("jacobian2.m");*/
+
+
+    
+}
+

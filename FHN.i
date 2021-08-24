@@ -18,8 +18,6 @@
 [Variables]
   [./u]
   [../]
-  [./w]
-  [../]
 []
 
 #[AuxVariables]
@@ -32,10 +30,6 @@
     type = ParsedFunction
     value = '(x<0.05)*(y<0.05)'
   [../]
-  [./ic_function2]
-    type = ParsedFunction
-    value = '0.0*x*y'
-  [../]
 []
 
 [ICs]
@@ -43,11 +37,6 @@
     type = FunctionIC
     variable = 'u'
     function = ic_function1
-  [../]
-  [./w_ic]
-     type = FunctionIC
-     variable = 'w'
-     function = ic_function2
   [../]
 []
 
@@ -65,19 +54,30 @@
      #block = 1
   #[../] 
   [./materials_electrophysiology] 
-     type =  EPmaterials
+     type = EPmaterials
      sigma_i = '0.001 0.001 0'
      C_m = 1.0 #membrane conductance
      Chi = 1.0 #surface per volume 
      block = 0 
   [../]
   #[./materials_electrophysiology_subdomain] 
-     #type =  EPmaterials
+     #type = EPmaterials
      #sigma_i = '0.0001 0.001 0'
      #C_m = 1.0 #membrane conductance
      #Chi = 1.0 #surface per volume 
      #block = 1
   #[../]
+  [./FHNmaterials]
+     type = FHNagumo
+     potential = u
+     V_rest = 0.0
+     V_thresh = 0.1
+     V_depol = 1.0
+     alpha = 5.0
+     beta = 1.0
+     delta = 0.1
+     gamma = 0.025  
+  [../]
 []
 
 [Kernels]
@@ -91,34 +91,10 @@
      order = 1 #order of time discretization (=1 or =2)
   [../]
   [./Nonlinear]
-     type = Potential_reaction
+     type = Ionicfunction
      variable = u
-     uthresh = 0.1
-     udepol = 1.0
-     urest = 0.0
-     alpha =  5.0 #ionic function coefficient f(u)=alpha*(u-u_rest)(u-u_thresh)(u-u_depol)
-     explicit = true # =true if explicit or =false if implicit
+     #explicit = true # =true if explicit or =false if implicit
   [../]
-  [./coupling1]
-     type = CoupledGating
-     variable = u
-     coupled_variable = w
-     coef = 1.0
-  [../]
-  [./timegating]
-     type = EPtimederivative
-     variable = w
-     order = 1
-  [../]
-  [./gating]
-     type = Gating
-     variable = w
-  [../] 
-  [./coupling2]
-     type = Coupledpotential
-     variable = w
-     coupled_variable = u
-  [../] 
 []
 
 #[AuxKernels]
@@ -141,7 +117,7 @@
   type = Transient
   solve_type = 'NEWTON'
   start_time = 0.0
-  end_time = 200.0
+  end_time = 200.00
   dt = 0.25
   #petsc_options_iname=' -ksp_type -pc_type -pc_factor_shift_type -pc_factor_mat_solver_package '
   #petsc_options_value='  preonly   lu       NONZERO               mumps '

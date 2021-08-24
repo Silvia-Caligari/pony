@@ -72,7 +72,7 @@ InputParameters Isotropic_Elasticity_Tensor::validParams()
      }
 
        // small deformations tensor
-      _E = (_U+_U.transpose())/2.0;
+      _E = (_U+_U.transpose() - _id)/2.0;
       
      _S[_qp] = 2.0 * mu * _E + lambda * _E.tr() * _id;
 

@@ -10,6 +10,8 @@
    delta = 0.1
    gamma = 0.025 
    method = 0 #(method = 0 Halley-method, method =1 Newton-Method)
+   #how_solve = 1
+   #material_name = EPmaterialsNew
 []
 
 [Mesh]

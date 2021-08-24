@@ -1,11 +1,11 @@
 [Mesh]
   [gmg]
    type = GeneratedMeshGenerator
-   dim = 2
-   nx = 64
-   ny = 64
-   xmax = 1
-   ymax = 1 
+   dim = 1
+   nx = 1
+   #ny = 64
+   #xmax = 1
+   #ymax = 1 
   []
   #[./subdomain]
    #type = ParsedSubdomainMeshGenerator
