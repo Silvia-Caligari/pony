@@ -35,5 +35,7 @@ protected:
   const VariableValue & _coupled_var_old;
     
   const Real & _u_thresh;
+
+  const VariableValue & _u_old;
 };
 

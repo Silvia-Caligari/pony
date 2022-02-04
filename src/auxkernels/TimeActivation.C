@@ -27,7 +27,8 @@ TimeActivation::TimeActivation(const InputParameters & parameters)
   : AuxKernel(parameters),
 _coupled_var(coupledValue("coupled_variable")),
 _coupled_var_old(coupledValueOld("coupled_variable")),
-_u_thresh(getParam<Real>("uthresh"))
+_u_thresh(getParam<Real>("uthresh")),
+_u_old( uOld() )
 {
 }
 
